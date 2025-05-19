@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Star Trail Animation</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at center, #020024 0%, #090979 50%, #000000 100%);
+      overflow: hidden;
+      font-family: sans-serif;
+      color: white;
+    }
+
+    .trail {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 8px 2px #ffffffaa;
+      pointer-events: none;
+    }
+
+    .neon-box {
+      width: 100px;
+      height: 100px;
+      background: #00ffe5;
+      border-radius: 20px;
+      box-shadow: 0 0 30px #00ffe5, 0 0 60px #00ffe5;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .box1 {
+      background: #ff00cc;
+      box-shadow: 0 0 30px #ff00cc, 0 0 60px #ff00cc;
+    }
+
+    .box2 {
+      background: #ffff00;
+      box-shadow: 0 0 30px #ffff00, 0 0 60px #ffff00;
+    }
+
+    .tag {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 1000;
+      font-family: monospace;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+
+  <div class="neon-box box1"></div>
+  <div class="neon-box box2"></div>
+  <div class="neon-box"></div>
+  <div class="tag">0px, 0px</div>
+
+  <script>
+    // 🐭 마우스를 따라다니는 별빛 트레일
+    const trailCount = 20;
+    const trails = [];
+    const tag = document.querySelector('.tag');
+    let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+    for (let i = 0; i < trailCount; i++) {
+      const dot = document.createElement('div');
+      dot.classList.add('trail');
+      document.body.appendChild(dot);
+      trails.push(dot);
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+
+      // 좌표 텍스트 업데이트
+      tag.innerText = `${mouse.x}px, ${mouse.y}px`;
+      tag.style.transform = `translate(${mouse.x + 15}px, ${mouse.y + 15}px)`;
+    });
+
+    gsap.ticker.add(() => {
+      trails.forEach((dot, i) => {
+        const prev = trails[i - 1] || { x: mouse.x, y: mouse.y };
+        const x = prev.x || prev._gsTransform?.x || mouse.x;
+        const y = prev.y || prev._gsTransform?.y || mouse.y;
+
+        gsap.set(dot, {
+          x: x + Math.sin(i + performance.now() / 500) * 5,
+          y: y + Math.cos(i + performance.now() / 500) * 5,
+          scale: 1 - i / trailCount,
+          opacity: 1 - i / trailCount
+        });
+
+        dot.x = x;
+        dot.y = y;
+      });
+    });
+
+    // 🎆 무한 회전하는 네온 박스들
+    gsap.to(".box1", {
+      duration: 5,
+      rotation: 360,
+      x: -200,
+      y: -150,
+      repeat: -1,
+      ease: "linear"
+    });
+
+    gsap.to(".box2", {
+      duration: 6,
+      rotation: -360,
+      x: 200,
+      y: 150,
+      repeat: -1,
+      ease: "linear"
+    });
+
+    gsap.to(".neon-box:not(.box1):not(.box2)", {
+      duration: 4,
+      rotation: 720,
+      scale: 1.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "power1.inOut"
+    });
+  </script>
+</body>
+</html>
